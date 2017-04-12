@@ -310,6 +310,8 @@ def configure(conf):
             conf.env.append_value('CFLAGS', '-O0')
         if conf.check_cc(cflags='-Wall'):
             conf.env.append_value('CFLAGS','-Wall')
+        if conf.check_cc(cflags='-fstack-protector-all'):
+           conf.env.append_value('CFLAGS','-fstack-protector-all')
     else:
         if not conf.options.optO3:
             if conf.check_cc(cflags='-O2'):

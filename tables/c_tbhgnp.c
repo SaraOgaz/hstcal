@@ -1,6 +1,7 @@
 # include <string.h>
-# include <fitsio.h>
+# include "fitsio.h"
 # include "ctables.h"
+
 
 void c_tbhgnp (IRAFPointer tp, int parnum,
                 char *keyword, int *dtype, char *str) {
@@ -23,16 +24,19 @@ char *str               o: string containing the value of the keyword
 
         fitsfile *fptr;
         TableDescr *tbl_descr;
-        char value[SZ_FITS_STR+1], comment[SZ_FITS_STR+1];
-        char *char_implying_float;
+        char value[SZ_FITS_STR+1];
+	*value = '\0';
+       char comment[SZ_FITS_STR+1];
+       *comment = '\0';
+        char *char_implying_float = NULL;
         int status = 0;
 
         tbl_descr = (TableDescr *)tp;
         fptr = tbl_descr->fptr;
 
         /* fits_read_keyn = ffgkyn */
-        fits_read_keyn (fptr, parnum, keyword, value, comment, &status);
-        if (status != 0) {
+        if ((status = fits_read_keyn (fptr, parnum, keyword, value, comment, &status)))
+         {
             setError (status, "c_tbhgnp:  couldn't read Nth keyword");
             keyword[0] = '\0';
             *dtype = -1;
@@ -40,18 +44,21 @@ char *str               o: string containing the value of the keyword
             return;
         }
 
-        if (strcmp (keyword, "HISTORY") == 0 ||
+
+        if (keyword && (strcmp (keyword, "HISTORY") == 0 ||
             strcmp (keyword, "COMMENT") == 0 ||
-            keyword[0] == ' ') {
-            strcpy (str, comment);
+			keyword[0] == '\0')) {
+	  if (comment){
+	    strcpy (str, comment);
+	  }
             *dtype = IRAF_CHAR;
-        } else if (strcmp (keyword, "END") == 0) {
+        } else if (keyword && strcmp (keyword, "END") == 0) {
             str[0] = '\0';              /* no value */
             *dtype = IRAF_CHAR;
         } else {
-            if (value[0] == '\'') {
+            if (value && value[0] == '\'') {
                 *dtype = IRAF_CHAR;
-            } else if (value[0] == 'T' || value[0] == 'F') {
+            } else if (value && (value[0] == 'T' || value[0] == 'F')) {
                 *dtype = IRAF_BOOL;
             } else {
                 char_implying_float = strpbrk (value, ".EeDd");

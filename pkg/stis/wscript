@@ -1,7 +1,8 @@
 # vim: set syntax=python:
 
 LIBRARIES = [
-    'calstis'
+    'calstis',
+    'exstis'
     ]
 
 def build(bld):

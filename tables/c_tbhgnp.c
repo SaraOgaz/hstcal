@@ -2,6 +2,7 @@
 # include <fitsio.h>
 # include "ctables.h"
 
+
 void c_tbhgnp (IRAFPointer tp, int parnum,
                 char *keyword, int *dtype, char *str) {
 
@@ -40,9 +41,10 @@ char *str               o: string containing the value of the keyword
             return;
         }
 
+
         if (strcmp (keyword, "HISTORY") == 0 ||
             strcmp (keyword, "COMMENT") == 0 ||
-            keyword[0] == ' ') {
+            keyword[0] == '\0') {
             strcpy (str, comment);
             *dtype = IRAF_CHAR;
         } else if (strcmp (keyword, "END") == 0) {

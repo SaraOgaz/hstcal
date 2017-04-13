@@ -1366,6 +1366,7 @@ static void tbhdr2image (IRAFPointer tp, Hdr *h) {
 			}
 			else if (strlen (comment) > 0){
 			    printf("flag 2:%s-%s\n",card,comment);
+			    printf("UH OH\n");
 			    addStringKw (h, keyword, card, comment);
 			    }
 		    else

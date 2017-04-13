@@ -33,5 +33,8 @@ int maxch               i: maximum length of the comment (not including '\0')
             comment[0] = '\0';
         } else {
             copyString (comment, cmt, maxch);
+            if (cmt){
+            printf("GRUE:%s\n",cmt);
+            }
         }
 }

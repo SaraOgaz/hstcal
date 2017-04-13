@@ -1352,27 +1352,33 @@ static void tbhdr2image (IRAFPointer tp, Hdr *h) {
 	    if (card[0] == 'F')
 	    bool_int_convert = 0;
 
-	    printf("flag 1:%s-%s-%d\n",keyword,card,bool_int_convert);
+
+
 		int suc;
 		suc = addBoolKw (h, keyword, bool_int_convert, comment);
-		printf("%d\n",suc);
+		/*printf("%d\n",suc);*/
 		break;
+
 	    case IRAF_CHAR:
 
 		if (keyword[0] == '\0') {
-
 		    if (strlen (card) > 0){
-			addSpacesKw (h, card);
+			    addSpacesKw (h, card);
+			    /*printf("flag 1\n");*/
 			}
 			else if (strlen (comment) > 0){
-			    printf("flag 2:%s-%s\n",card,comment);
-			    printf("UH OH\n");
 			    addStringKw (h, keyword, card, comment);
-			    }
-		    else
+			    printf("%i-\n",keyword[0]);
+			    printf("flag 2:%s\n",comment);
+			}
+		    else{
 			addSpacesKw (h, "        /");
+			printf("%i-\n",keyword[0]);
+			printf("flag 3:%s\n",comment);
+			}
 		} else {
 		    addStringKw (h, keyword, card, comment);
+		    /*printf("flag 4\n");*/
 		}
 		break;
 	    default:

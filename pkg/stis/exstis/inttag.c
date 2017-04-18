@@ -615,17 +615,6 @@ void get_primary_header_par (char *input,
 	closeImage (im);
 
 
-	/*IRAFPointer im;
-	char name[SZ_LINE];
-
-	strcpy (name, input);
-	strcat (name, "[0]");*/
-
-    /*SingleGroup simage;
-    initSingleGroup(&simage);
-
-    getSingleGroup(input, 1, &simage);*/
-
     if ((status = Get_KeyI(&phdr, "CENTERA1", 0, 0, xcenter)) )
         return;
 
@@ -1298,8 +1287,12 @@ double crpix[2]         io: reference pixel
 
 static void tbhdr2image (IRAFPointer tp, Hdr *h) {
 
-	char card[SZ_CARD], keyword[SZ_KEYW+1];
+  char card[SZ_CARD];
+  *card = '\0';
+  char keyword[SZ_KEYW+1];
+  *keyword = '\0';
 	char comment[SZ_CARD];
+	*comment = '\0';
 	int  i, nlines, dtype;
 	int bool_int_convert;
 	int axes[2];		/* column numbers for AXIS1 & AXIS2 */
@@ -1316,9 +1309,9 @@ static void tbhdr2image (IRAFPointer tp, Hdr *h) {
 	    c_tbhgcm (tp, keyword, comment, SZ_CARD-1);
 
 
-        /*
-	    printf("%s-%s\n",keyword,card);
-	    */
+        
+	    //printf("%s-%s\n",keyword,card);
+	    
 
 
 	    /* Do we already have image-specific WCS keywords?  (Setting
@@ -1361,12 +1354,18 @@ static void tbhdr2image (IRAFPointer tp, Hdr *h) {
 
 	    case IRAF_CHAR:
 
-		if (keyword[0] == '\0') {
-		    if (strlen (card) > 0){
+		if (keyword && keyword[0] == '\0') {
+		  printf("keyword, %c\n", *keyword);
+		  printf("card %s\n", card);
+		  printf("comment %s\n", comment);
+		  printf("card len %d\n", strlen (card));
+		  printf("comment len %d\n", strlen (comment));
+		    
+		    if (card && strlen (card) > 0){
 			    addSpacesKw (h, card);
-			    /*printf("flag 1\n");*/
+			    printf("flag 1\n");
 			}
-			else if (strlen (comment) > 0){
+			else if (comment && strlen (comment) > 0){
 			    addStringKw (h, keyword, card, comment);
 			    printf("%i-\n",keyword[0]);
 			    printf("flag 2:%s\n",comment);

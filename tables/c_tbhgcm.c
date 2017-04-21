@@ -29,7 +29,6 @@ int maxch               i: maximum length of the comment (not including '\0')
 	   then a null value is returned.  If comm = NULL, then do not 
 	   return the comment string. */ 
         fits_read_keyword (tbl_descr->fptr, keyword, value, cmt, &status);
-	//printf("GRUEAGAIN:%s\n",cmt);
         if (status != 0)
             setError (status, "c_tbhgcm:  error reading comment");
 
@@ -39,8 +38,5 @@ int maxch               i: maximum length of the comment (not including '\0')
             comment[0] = '\0';
         } else {
             copyString (comment, cmt, maxch);
-            if (cmt){
-	      //printf("GRUE:%s\n",cmt);
-            }
         }
 }

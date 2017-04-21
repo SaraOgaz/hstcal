@@ -311,8 +311,11 @@ int main (int argc, char **argv) {
 		} else {
 
 		    c_tbegtd (tp, cp_time, row, &time);
-		    if (c_iraferr())
+		    // Temporary work around, I think the this code really needs
+		    // to fix the way it's using ffgkey in the tbhgcm calls
+		    if (status)
 			crash ("getting time from table");
+
 
 		    /* See if event time is in the current interval */
 		    if (time < start_time) {
@@ -335,7 +338,9 @@ int main (int argc, char **argv) {
 		if (good_time) {
 		    c_tbegti (tp, cp_xindex, row, &xindex);
 		    c_tbegti (tp, cp_yindex, row, &yindex);
-		    if (c_iraferr())
+		    // Temporary work around, I think the this code really needs
+		    // to fix the way it's using ffgkey in the tbhgcm calls
+		    if (status)
 			crash ("getting position from table");
 		    /* Subtract corner and convert to zero indexed. */
 		    xindex -= (xcorner + 1);
@@ -629,42 +634,6 @@ void get_primary_header_par (char *input,
 
 
     freeHdr (&phdr);
-
-
-    /*
-	im = c_immap (name, IRAF_READ_ONLY, 0);
-	if (c_iraferr()) {
-	   printf ("Cannot open Primary FITS header in file %s\n", name);
-	   status = ERROR;
-	   return;
-	}
-	*xcenter = c_imgeti (im, "CENTERA1");
-	if (c_iraferr()) {
-	   printf ("Keyword CENTERA1 not found in Primary header\n");
-	   status = ERROR;
-	   return;
-	}
-	*ycenter = c_imgeti (im, "CENTERA2");
-	if (c_iraferr()) {
-	   printf ("Keyword CENTERA2 not found in Primary header\n");
-	   status = ERROR;
-	   return;
-	}
-	*nx = c_imgeti (im, "SIZAXIS1");
-	if (c_iraferr()) {
-	   printf ("Keyword SIZAXIS1 not found in Primary header\n");
-	   status = ERROR;
-	   return;
-	}
-	*ny = c_imgeti (im, "SIZAXIS2");
-	if (c_iraferr()) {
-	   printf ("Keyword SIZAXIS2 not found in Primary header\n");
-	   status = ERROR;
-	   return;
-	}
-
-	c_imunmap(im);
-	*/
 }
 
 /* This routine opens an EVENTS table. */
@@ -1151,6 +1120,7 @@ double exp_time     i: exposure time, seconds
 	    crash ("in putgrpkey, opening first EVENTS extension");
 
 	/* Copy the primary header from input to the output extensions. */
+
 	tbhdr2image (tp, &ttag->sci.hdr);
 	tbhdr2image (tp, &ttag->err.hdr);
 	tbhdr2image (tp, &ttag->dq.hdr);
@@ -1308,12 +1278,6 @@ static void tbhdr2image (IRAFPointer tp, Hdr *h) {
 	    c_tbhgnp (tp, i, keyword, &dtype, card);
 	    c_tbhgcm (tp, keyword, comment, SZ_CARD-1);
 
-
-        
-	    //printf("%s-%s\n",keyword,card);
-	    
-
-
 	    /* Do we already have image-specific WCS keywords?  (Setting
 		this flag based on CTYPE assumes that the image-specific
 		keywords precede the pixel list type keywords.)
@@ -1346,38 +1310,25 @@ static void tbhdr2image (IRAFPointer tp, Hdr *h) {
 	    bool_int_convert = 0;
 
 
-
 		int suc;
 		suc = addBoolKw (h, keyword, bool_int_convert, comment);
-		/*printf("%d\n",suc);*/
 		break;
 
 	    case IRAF_CHAR:
 
 		if (keyword && keyword[0] == '\0') {
-		  printf("keyword, %c\n", *keyword);
-		  printf("card %s\n", card);
-		  printf("comment %s\n", comment);
-		  printf("card len %d\n", strlen (card));
-		  printf("comment len %d\n", strlen (comment));
 		    
 		    if (card && strlen (card) > 0){
 			    addSpacesKw (h, card);
-			    printf("flag 1\n");
 			}
 			else if (comment && strlen (comment) > 0){
 			    addStringKw (h, keyword, card, comment);
-			    printf("%i-\n",keyword[0]);
-			    printf("flag 2:%s\n",comment);
 			}
 		    else{
 			addSpacesKw (h, "        /");
-			printf("%i-\n",keyword[0]);
-			printf("flag 3:%s\n",comment);
 			}
 		} else {
 		    addStringKw (h, keyword, card, comment);
-		    /*printf("flag 4\n");*/
 		}
 		break;
 	    default:

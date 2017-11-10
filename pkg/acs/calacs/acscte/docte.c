@@ -10,6 +10,7 @@
 # include <time.h>
 # include <assert.h>
 
+#include "hstcal_memory.h"
 #include "hstcal.h"
 # include "hstio.h"
 
@@ -17,6 +18,7 @@
 # include "acsinfo.h"
 # include "acsversion.h"
 # include "hstcalerr.h"
+#include "trlbuf.h"
 
 # include "../../../../ctegen2/ctegen2.h"
 # include "pcte.h"

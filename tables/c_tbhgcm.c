@@ -1,5 +1,5 @@
 # include <string.h>
-# include <fitsio.h>
+# include "fitsio.h"
 # include "ctables.h"
 
 void c_tbhgcm (IRAFPointer tp, char *keyword, char *comment, int maxch) {
@@ -18,11 +18,16 @@ int maxch               i: maximum length of the comment (not including '\0')
 
         TableDescr *tbl_descr;
         char value[SZ_FITS_STR+1], cmt[SZ_FITS_STR+1];
+	*value = '\0';
+	*cmt = '\0';
         int status = 0;
 
         tbl_descr = (TableDescr *)tp;
 
         /* fits_read_keyword = ffgkey */
+	/* SAYS: If the keyword has no value (no equal sign in column 9) 
+	   then a null value is returned.  If comm = NULL, then do not 
+	   return the comment string. */ 
         fits_read_keyword (tbl_descr->fptr, keyword, value, cmt, &status);
         if (status != 0)
             setError (status, "c_tbhgcm:  error reading comment");

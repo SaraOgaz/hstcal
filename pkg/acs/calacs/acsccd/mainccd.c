@@ -18,11 +18,21 @@ int status = 0;			/* zero is OK */
 # include "acscorr.h"		/* calibration switch names for acsccd */
 # include "hstcalversion.h"
 # include "acsversion.h"
+#include "trlbuf.h"
 
 /* Standard string buffer for use in messages */
 char MsgText[MSG_BUFF_LENGTH]; // Global char auto initialized to '\0'
+struct TrlBuf trlbuf = { 0 };
 
 static void FreeNames (char *, char *, char *, char *);
+static void printSyntax(void)
+{
+    printf ("syntax:  acsccd [--help] [-t] [-v] [-q] [--version] [--gitinfo] input output\n");
+}
+static void printHelp(void)
+{
+    printSyntax();
+}
 
 /* This is the main module for ACSCCD.  It gets the input and output
  file names, calibration switches, and flags, and then calls ACSccd.
@@ -138,6 +148,11 @@ int main (int argc, char **argv) {
                 printGitInfo();
                 exit(0);
             }
+            if (!(strcmp(argv[i],"--help")))
+            {
+                printHelp();
+                exit(0);
+            }
             for (j = 1;  argv[i][j] != '\0';  j++) {
                 if (argv[i][j] == 't') {
                     printtime = YES;
@@ -147,6 +162,7 @@ int main (int argc, char **argv) {
                     quiet = YES;
                 } else {
                     printf (MsgText, "Unrecognized option %s\n", argv[i]);
+                    printSyntax();
                     FreeNames (inlist, outlist, input, output);
                     exit (1);
                 }
@@ -160,7 +176,7 @@ int main (int argc, char **argv) {
         }
     }
     if (inlist[0] == '\0' || too_many) {
-        printf ("syntax:  acsccd [-t] [-v] [-q] [--version] [--gitinfo] input output\n");
+        printSyntax();
         /*
         printf ("  command-line switches:\n");
         printf ("       -dqi -atod -blev -bias\n");
@@ -195,7 +211,7 @@ int main (int argc, char **argv) {
         status = 1;
     if (status) {
         FreeNames (inlist, outlist, input, output);
-        CloseTrlBuf();
+        CloseTrlBuf(&trlbuf);
         exit (ERROR_RETURN);
     }
 
@@ -240,7 +256,7 @@ int main (int argc, char **argv) {
     c_imtclose (o_imt);
     FreeRefFile (&refnames);
     FreeNames (inlist, outlist, input, output);
-    CloseTrlBuf();
+    CloseTrlBuf(&trlbuf);
 
     if (status)
         exit (ERROR_RETURN);

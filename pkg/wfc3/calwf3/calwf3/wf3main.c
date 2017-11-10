@@ -7,6 +7,7 @@
 # include "hstcalerr.h"
 # include "wf3version.h"
 # include "hstcalversion.h"
+# include "trlbuf.h"
 
 /* H. Bushouse	07-Sep-2011	Implemented new "--version" command line argument. */
 /* M. Sosey     added a -r to also print the version (-v is used, so warren chose r for revision */
@@ -15,9 +16,19 @@
  */
 
 int	status;		/* value of zero indicates OK */
+struct TrlBuf trlbuf = { 0 };
 
 /* Standard string buffer for use in messages */
 char MsgText[MSG_BUFF_LENGTH]; // Global char auto initialized to '\0'
+
+static void printSyntax(void)
+{
+    printf("syntax:  calwf3.e [--help] [-t] [-s] [-v] [-q] [-r] [-1] [--version] [--gitinfo] input \n");
+}
+static void printHelp(void)
+{
+    printSyntax();
+}
 
 int main (int argc, char **argv) {
 
@@ -62,6 +73,11 @@ int main (int argc, char **argv) {
             printGitInfo();
             exit(0);
         }
+        if (!(strcmp(argv[i],"--help")))
+        {
+            printHelp();
+            exit(0);
+        }
 		if (argv[i][0] == '-') {
 			for (j = 1;  argv[i][j] != '\0';  j++) {
 				if (argv[i][j] == 't') {
@@ -81,6 +97,7 @@ int main (int argc, char **argv) {
                     onecpu = YES;
                 } else {
 					printf ("Unrecognized option %s\n", argv[i]);
+					printSyntax();
 					exit (ERROR_RETURN);
 				}
 			}
@@ -92,7 +109,7 @@ int main (int argc, char **argv) {
 	}
 
 	if (input[0] == '\0' || too_many) {
-		printf ("syntax:  calwf3.e [-t] [-s] [-v] [-q] [-r] [-1] [--version] [--gitinfo] input \n");
+	    printSyntax();
 		exit (ERROR_RETURN);
 	}
 
@@ -120,7 +137,7 @@ int main (int argc, char **argv) {
 			trlerror (MsgText);
 			/* Provide interpretation of error for user */
 			WhichError (status);
-			CloseTrlBuf ();
+			CloseTrlBuf(&trlbuf);
 			exit (ERROR_RETURN);
 		}
 	}
@@ -129,7 +146,7 @@ int main (int argc, char **argv) {
 	sprintf (MsgText, "CALWF3 completion for %s", input);
 	trlmessage (MsgText);
 
-	CloseTrlBuf ();
+	CloseTrlBuf(&trlbuf);
 
 	/* Exit the program */
 	exit (0);

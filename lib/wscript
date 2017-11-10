@@ -3,12 +3,14 @@
 def build(bld):
     t = bld.stlib(
         source = [
-            'dummy.c',
+            'hstcal_memory.c',
+            'trlbuf.c',
             'hstcalversion.c'
             ],
         target = 'hstcallib',
-        includes = ['../include/',
-                    '../cfitsio',
+        includes = ['./',
+                    '../include/',
+                    '../cfitsio'
                     ],
         use = ['CFITSIO', 'OPENMP'],
         install_path = bld.env.INSTALL_LIB and '${PREFIX}/lib'

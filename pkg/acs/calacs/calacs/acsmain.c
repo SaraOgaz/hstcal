@@ -7,6 +7,7 @@
 # include "hstcalerr.h"
 # include "acsversion.h"
 # include "hstcalversion.h"
+# include "trlbuf.h"
 
 # ifdef _OPENMP
 #  include <omp.h>
@@ -16,13 +17,18 @@
 */
 
 int	status;		/* value of zero indicates OK */
+struct TrlBuf trlbuf = { 0 };
 
 /* Standard string buffer for use in messages */
 char MsgText[MSG_BUFF_LENGTH]; // Global char auto initialized to '\0'
 
-static void printSyntax()
+static void printSyntax(void)
 {
-    printf ("syntax:  calacs.e [-t] [-s] [-v] [-q] [-r] [--version] [--gitinfo] [-1|--nthreads <N>] [--ctegen <1|2>] [--pctetab <path>] input \n");
+    printf("syntax:  calacs.e [--help] [-t] [-s] [-v] [-q] [-r] [--version] [--gitinfo] [-1|--nthreads <N>] [--ctegen <1|2>] [--pctetab <path>] input \n");
+}
+static void printHelp(void)
+{
+    printSyntax();
 }
 
 int main(int argc, char **argv) {
@@ -74,6 +80,11 @@ int main(int argc, char **argv) {
         if (!(strcmp(argv[i],"--gitinfo")))
         {
             printGitInfo();
+            exit(0);
+        }
+        if (!(strcmp(argv[i],"--help")))
+        {
+            printHelp();
             exit(0);
         }
         if (strncmp(argv[i], "--ctegen", 8) == 0)
@@ -232,7 +243,7 @@ int main(int argc, char **argv) {
 		    trlerror (MsgText);
             /* Added 19 Mar 1999 - provides interpretation of error for user */
             WhichError (status);
-		    CloseTrlBuf ();
+		    CloseTrlBuf(&trlbuf);
 	        exit (ERROR_RETURN);
         }
 	}
@@ -241,7 +252,7 @@ int main(int argc, char **argv) {
 	sprintf (MsgText, "CALACS completion for %s", input);
 	trlmessage (MsgText);
 
-	CloseTrlBuf ();
+	CloseTrlBuf(&trlbuf);
 
 	/* Exit the program */
 	exit(0);

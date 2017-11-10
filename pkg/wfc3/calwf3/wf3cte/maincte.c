@@ -25,6 +25,7 @@ MLS 2015
 # include "wf3corr.h"		/* calibration switch names for WFC3ccd */
 # include "wf3version.h"
 # include "hstcalversion.h"
+# include "trlbuf.h"
 
 # ifdef _OPENMP
 #  include <omp.h>
@@ -40,9 +41,18 @@ int CompareNumbers (int, int, char *);
 int LoadHdr (char *, Hdr *);
 int GetSwitch (Hdr *, char *, int *);
 void initCCDSwitches (CCD_Switch *);
+static void printSyntax(void)
+{
+    printf ("syntax:  WF3cte [--help] [-v] [-1] [--version] [--gitinfo] input output\n");
+}
+static void printHelp(void)
+{
+    printSyntax();
+}
 
 /* Standard string buffer for use in messages */
 char MsgText[MSG_BUFF_LENGTH]; // Global char auto initialized to '\0'
+struct TrlBuf trlbuf = { 0 };
 
 /* 
 
@@ -120,6 +130,11 @@ int main (int argc, char **argv) {
                 printGitInfo();
                 exit(0);
             }
+            if (!(strcmp(argv[i],"--help")))
+            {
+                printHelp();
+                exit(0);
+            }
             for (j = 1;  argv[i][j] != '\0';  j++) {
                 if (argv[i][j] == 't') {
                     printtime = YES;
@@ -132,6 +147,7 @@ int main (int argc, char **argv) {
 					exit(0);
                 } else {
                     printf (MsgText, "Unrecognized option %s\n", argv[i]);
+                    printSyntax();
                     FreeNames (inlist, outlist, input, output);
                     exit (ERROR_RETURN);
                 }
@@ -145,7 +161,7 @@ int main (int argc, char **argv) {
         }
     }
     if (inlist[0] == '\0' || too_many) {
-        printf ("syntax:  WF3cte [-v] [-1] [--version] [--gitinfo] input output\n");
+        printSyntax();
         FreeNames (inlist, outlist, input, output);
         exit (ERROR_RETURN);
     }
@@ -167,7 +183,7 @@ int main (int argc, char **argv) {
         status = 1;
     if (status) {
         FreeNames (inlist, outlist, input, output);
-        CloseTrlBuf();
+        CloseTrlBuf(&trlbuf);
         exit (ERROR_RETURN);
     }
 
@@ -232,7 +248,7 @@ int main (int argc, char **argv) {
     c_imtclose (o_imt);
     FreeRefFile (&refnames);
     FreeNames (inlist, outlist, input, output);
-    CloseTrlBuf();
+    CloseTrlBuf(&trlbuf);
 
     if (status)
         exit (ERROR_RETURN);

@@ -150,4 +150,5 @@ void c_tbapts (IRAFPointer tp, IRAFPointer cp, int row, short *buffer,
 void c_tbaptt (IRAFPointer tp, IRAFPointer cp, int row, char **cbuf,
                 int maxch, int first, int nelem);
 
-#endif /* INCL_XTABLES_H */
+#endif
+

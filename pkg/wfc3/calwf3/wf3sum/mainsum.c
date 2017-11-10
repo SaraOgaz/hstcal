@@ -14,9 +14,20 @@ int status = 0;			/* zero is OK */
 # include "hstcalerr.h"
 # include "wf3version.h"
 # include "hstcalversion.h"
+# include "trlbuf.h"
 
 /* Standard string buffer for use in messages */
 char MsgText[MSG_BUFF_LENGTH]; // Global char auto initialized to '\0'
+struct TrlBuf trlbuf = { 0 };
+
+static void printSyntax(void)
+{
+    printf ("syntax:  wf3sum [--help] [-t] [-v] [-q] [-r] [--version] [--gitinfo] input output\n");
+}
+static void printHelp(void)
+{
+    printSyntax();
+}
 
 /* 
     This function will only return either 0 (WF3_OK) if everything
@@ -71,6 +82,11 @@ int main (int argc, char **argv) {
                 printGitInfo();
                 exit(0);
             }
+            if (!(strcmp(argv[i],"--help")))
+            {
+                printHelp();
+                exit(0);
+            }
 		for (j = 1;  argv[i][j] != '\0';  j++) {
 		    if (argv[i][j] == 't') {
 			printtime = YES;
@@ -83,6 +99,7 @@ int main (int argc, char **argv) {
                 exit(0);
 		    } else {
 			printf (MsgText, "Unrecognized option %s\n", argv[i]);
+			printSyntax();
 			free (input);
 			free (output);
 			exit (1);
@@ -97,7 +114,7 @@ int main (int argc, char **argv) {
 	    }
 	}
 	if (input[0] == '\0' || too_many) {
-	    printf ("syntax:  wf3sum [-t] [-v] [-q] [-r] [--version] [--gitinfo] input output\n");
+	    printSyntax();
 	    free (input);
 	    free (output);
 	    exit (ERROR_RETURN);
@@ -115,7 +132,7 @@ int main (int argc, char **argv) {
 		free (input);
 		free (output);
 		WhichError (status);
-        CloseTrlBuf ();
+        CloseTrlBuf(&trlbuf);
 		exit (ERROR_RETURN);
 	    }
 	}
@@ -130,7 +147,7 @@ int main (int argc, char **argv) {
 	free (output);
 	free (mtype);
 
-	CloseTrlBuf ();
+	CloseTrlBuf(&trlbuf);
 
 	if (status)
 	    exit (ERROR_RETURN);

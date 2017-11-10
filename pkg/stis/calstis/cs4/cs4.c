@@ -14,6 +14,14 @@
 
 static int CompareNumbers (int, int);
 static void FreeNames (char *, char *, char *, char *);
+static void printSyntax(void)
+{
+    printf("syntax:  cs4.e [--help] [-t] [-v] [--version] [--gitinfo] input [-angle slit_angle] [-d debugfile]\n");
+}
+static void printHelp(void)
+{
+    printSyntax();
+}
 
 /* This is the main module for calstis4.  It gets the input file name
    and command-line flags, and then calls CalStis4.
@@ -101,6 +109,11 @@ int main (int argc, char **argv) {
             printGitInfo();
             exit(0);
         }
+        if (!(strcmp(argv[i],"--help")))
+        {
+            printHelp();
+            exit(0);
+        }
 		if (strcmp (argv[i], "-r") == 0) {
 		    PrFullVersion();
 		    exit (0);
@@ -118,8 +131,8 @@ int main (int argc, char **argv) {
 			    /* next argument must be debug file name */
 			    dbg_next = 1;
 			} else {
-			    printf ("ERROR:  Unrecognized option %s\n",
-				argv[i]);
+			    printf ("ERROR:  Unrecognized option %s\n", argv[i]);
+			    printSyntax();
 			    exit (1);
 			}
 		    }
@@ -131,8 +144,7 @@ int main (int argc, char **argv) {
 	    }
 	}
 	if (inlist[0] == '\0' || too_many || dbg_next) {
-	    printf (
-	"syntax:  cs4.e [-t] [-v] [--version] [--gitinfo] input [-angle slit_angle] [-d debugfile]\n");
+	    printSyntax();
 	    FreeNames (inlist, input, dbglist, dbgfile);
 	    exit (ERROR_RETURN);
 	}

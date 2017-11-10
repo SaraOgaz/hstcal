@@ -18,11 +18,24 @@ int status = 0;			/* zero is OK */
 # include "wf3corr.h"		/* calibration switch names for cs1 */
 # include "wf3version.h"
 # include "hstcalversion.h"
+# include "trlbuf.h"
 
 static void FreeNames (char *, char *, char *, char *);
+static void printSyntax(void)
+{
+    printf ("syntax:  wf32d [--help] [-t] [-v] [-q] [-r] [--version] [--gitinfo] input output\n");
+    printf ("  command-line switches:\n");
+    printf ("       -dqi  -atod\n");
+    printf ("       -dark -flat -shad -phot -stat\n");
+}
+static void printHelp(void)
+{
+    printSyntax();
+}
 
 /* Standard string buffer for use in messages */
 char MsgText[MSG_BUFF_LENGTH]; // Global char auto initialized to '\0'
+struct TrlBuf trlbuf = { 0 };
 
 /* This is the main module for wf32d.  It gets the input and output
    file names, calibration switches, and flags, and then calls wf32d.
@@ -112,6 +125,11 @@ int main (int argc, char **argv) {
             printGitInfo();
             exit(0);
         }
+        if (!(strcmp(argv[i],"--help")))
+        {
+            printHelp();
+            exit(0);
+        }
 	    if (strcmp (argv[i], "-dqi") == 0) {	/* turn on */
 		wf32d_sw.dqicorr = PERFORM;
 		switch_on = 1;
@@ -140,6 +158,7 @@ int main (int argc, char **argv) {
               exit(0);
 		    } else {
 			printf ("Unrecognized option %s\n", argv[i]);
+			printSyntax();
 	    		FreeNames (inlist, outlist, input, output);
 			exit (1);
 		    }
@@ -153,10 +172,7 @@ int main (int argc, char **argv) {
 	    }
 	}
 	if (inlist[0] == '\0' || too_many) {
-	    printf ("syntax:  wf32d [-t] [-v] [-q] [-r] [--version] [--gitinfo] input output\n");
-	    printf ("  command-line switches:\n");
-	    printf ("       -dqi  -atod\n");
-	    printf ("       -dark -flat -shad -phot -stat\n");
+	    printSyntax();
 	    FreeNames (inlist, outlist, input, output);
 	    exit (ERROR_RETURN);
 	}
@@ -189,7 +205,7 @@ int main (int argc, char **argv) {
 		
 	if (status) {
 	    FreeNames (inlist, outlist, input, output);
-        CloseTrlBuf ();
+        CloseTrlBuf(&trlbuf);
 	    exit (ERROR_RETURN);
 	}
 
@@ -223,7 +239,7 @@ int main (int argc, char **argv) {
 	c_imtclose (o_imt);
 	FreeRefFile (&refnames);
 	FreeNames (inlist, outlist, input, output);
-	CloseTrlBuf ();
+	CloseTrlBuf(&trlbuf);
 	
 	if (status)
 	    exit (ERROR_RETURN);

@@ -266,7 +266,7 @@ int main (int argc, char **argv) {
 	    }
 
 	    /* Allocate space for output image */
-	    allocSingleGroup (&ttag, nx, ny);
+	    allocSingleGroup (&ttag, nx, ny, True);
 
 	    /* Read X, Y and TIME for the current imset. */
 

@@ -2,7 +2,7 @@
 
 LIBRARIES = [
     'calstis',
-    'tastis'
+    'exstis'
     ]
 
 def build(bld):

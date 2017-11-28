@@ -97,6 +97,7 @@ Check PROPAPER for "D1" in addition to "E1".
 # include <c_iraf.h>
 # include <xclio.h>
 # include <ximio.h>
+# include <hstio.h>
 
 # include "tastis.h"
 
@@ -251,6 +252,8 @@ int main (int argc, char **argv) {
 static int TargetAcqAnalysis (char *image, int update, int *acqstatus) {
 
 	IRAFPointer  imraw0, imraw1, imraw4, imraw7, imspt1, imspt0;
+	IODescPtr im;
+	Hdr phdr;
 	int          size, i, status;
 	char         rawfile[SZ_FNAME],
 		     sptfile[SZ_FNAME],
@@ -350,75 +353,80 @@ static int TargetAcqAnalysis (char *image, int update, int *acqstatus) {
 	       which tests succeeded and which failed.
 	    */
 	    strcpy (rawfile, image);
-	    strcat (rawfile, "[0]");
-	    imraw0 = c_immap (rawfile, IRAF_READ_WRITE, 0);
-	    if (c_iraferr()) {
-		printf ("Warning:  Can't update keyword(s) in %s\n", image);
-		clear_cvoserr();
+	    initHdr (&phdr);
+
+	    im = openUpdateImage (rawfile, "", 0, &phdr);
+	    if (hstio_err()) {
+	        return (status = 114);
 	    } else {
 
-		if (badacq)
-		    c_imastr (imraw0, "acqstat", "FAILED");
-		else
-		    c_imastr (imraw0, "acqstat", "OK");
+	        if (badacq)
+	            putKeyS (&phdr, "ACQSTAT", "FAILED", "\ ");
+	        else
+	            putKeyS (&phdr, "ACQSTAT", "OK", "\ ");
 
-		if (strcmp (keywords->obsmode, "ACQ") == 0) {
+	        if (strcmp (keywords->obsmode, "ACQ") == 0) {
 
-		    if (badacq & BAD_RATIO_HIGH)
-			c_imastr (imraw0, "acq_rat", "HIRATIO");
-		    else if (badacq & BAD_RATIO_LOW)
-			c_imastr (imraw0, "acq_rat", "LORATIO");
-		    else
-			c_imastr (imraw0, "acq_rat", "OKRATIO");
+	            if (badacq & BAD_RATIO_HIGH)
+	                putKeyS (&phdr, "ACQ_RAT", "HIRATIO", "\ ");
+	            else if (badacq & BAD_RATIO_LOW)
+	                putKeyS (&phdr, "ACQ_RAT", "LORATIO", "\ ");
+	            else
+	                putKeyS (&phdr, "ACQ_RAT", "OKRATIO", "\ ");
 
-		    if (badacq & BAD_SLEW)
-			c_imastr (imraw0, "acq_slew", "BIGSLEW");
-		    else
-			c_imastr (imraw0, "acq_slew", "OK_SLEW");
+	            if (badacq & BAD_SLEW)
+	                putKeyS (&phdr, "ACQ_SLEW", "BIGSLEW", "\ ");
+	            else
+	                putKeyS (&phdr, "ACQ_SLEW", "OK_SLEW", "\ ");
 
-		    if (badacq & BAD_SATURATED)
-			c_imastr (imraw0, "acq_sat", "SAT");
-		    else
-			c_imastr (imraw0, "acq_sat", "UNSAT");
+	            if (badacq & BAD_SATURATED)
+	                putKeyS (&phdr, "ACQ_SAT", "SAT", "\ ");
+	            else
+	                putKeyS (&phdr, "ACQ_SAT", "UNSAT", "\ ");
 
-		    if (badacq & BAD_LAMP_LOW)
-			c_imastr (imraw0, "acq_lamp", "LO_LAMP");
-		    else
-			c_imastr (imraw0, "acq_lamp", "OK_LAMP");
+	            if (badacq & BAD_LAMP_LOW)
+	                putKeyS (&phdr, "ACQ_LAMP", "LO_LAMP", "\ ");
+	            else
+	                putKeyS (&phdr, "ACQ_LAMP", "OK_LAMP", "\ ");
 
-		} else {		/* ACQ/PEAK */
+	        } else {		/* ACQ/PEAK */
 
-		    if (badacq & BAD_RATIO_HIGH)
-			c_imastr (imraw0, "acqp_rat", "HIRATIO");
-		    else if (badacq & BAD_RATIO_LOW)
-			c_imastr (imraw0, "acqp_rat", "LORATIO");
-		    else
-			c_imastr (imraw0, "acqp_rat", "OKRATIO");
+	            if (badacq & BAD_RATIO_HIGH)
+	                putKeyS (&phdr, "ACAP_RAT", "HIRATIO", "\ ");
+	            else if (badacq & BAD_RATIO_LOW)
+	                putKeyS (&phdr, "ACAP_RAT", "LORATIO", "\ ");
+	            else
+	                putKeyS (&phdr, "ACAP_RAT", "OKRATIO", "\ ");
 
-		    if (badacq & BAD_FLUX)
-			c_imastr (imraw0, "acqp_flx", "LO_FLUX");
-		    else
-			c_imastr (imraw0, "acqp_flx", "OK_FLUX");
+	            if (badacq & BAD_FLUX)
+	                putKeyS (&phdr, "ACAP_FIX", "LO_FLUX", "\ ");
+	            else
+	                putKeyS (&phdr, "ACAP_FIX", "OK_FLUX", "\ ");
 
-		    if (badacq & BAD_SATURATED)
-			c_imastr (imraw0, "acqp_sat", "SAT");
-		    else
-			c_imastr (imraw0, "acqp_sat", "UNSAT");
+	            if (badacq & BAD_SATURATED)
+	                putKeyS (&phdr, "ACAP_SAT", "SAT", "\ ");
+	            else
+	                putKeyS (&phdr, "ACAP_SAT", "UNSAT", "\ ");
 
-		    if (badacq & BAD_END)
-			c_imastr (imraw0, "acqp_end", "HI_END");
-		    else
-			c_imastr (imraw0, "acqp_end", "OK_END");
-		}
+	            if (badacq & BAD_END)
+	                putKeyS (&phdr, "ACAP_END", "HI_END", "\ ");
+	            else
+	                putKeyS (&phdr, "ACAP_END", "OK_END", "\ ");
+	        }
 
-		if (badacq & BAD_TDF)
-		   c_imastr (imraw0, "dataflag", "TDFDown");
-		else if (no_spt)
-		   c_imastr (imraw0, "dataflag", "UNKNOWN");
-		else
-		   c_imastr (imraw0, "dataflag", "TDF_Up");
+	        if (badacq & BAD_TDF)
+	            putKeyS (&phdr, "DATAFLAG", "TDFDown", "\ ");
+	        else if (no_spt)
+	            putKeyS (&phdr, "DATAFLAG", "UNKNOWN", "\ ");
+	        else
+	            putKeyS (&phdr, "DATAFLAG", "TDF_Up", "\ ");
 
-		c_imunmap (imraw0);
+	        putHeader (im);
+	        if (hstio_err())
+	            return (status = 114);
+	            closeImage (im);
+
+	        freeHdr (&phdr);
 	    }
 	}
 
